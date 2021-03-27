@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.urlencoded({ extended: false }));
+app.use(require("morgan")("dev"));
 app.use(express.json()); // JSON parsing
 app.use(cors()); // allow all CORS requests
 app.use(passport.initialize());
@@ -26,5 +27,25 @@ app.use('/api/users', routes.user);
 
 // Server
 const server = app.listen(PORT, () => console.log(`Server is running on PORT: ${PORT}`));
+
+// Socket.io stuff
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*'
+  }
+});
+
+io.on('connection', socket => {
+  console.log(`connect: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`disconnect: ${socket.id}`);
+  });
+});
+
+setInterval(() => {
+  io.emit('message', new Date().toTimeString());
+}, 5000);
+
 
 module.exports = server;

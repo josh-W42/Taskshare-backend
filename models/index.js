@@ -2,7 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 // Better Practice to hid the mongo url
-const { MONGO_URL } = process.env;
+const url = process.env.MONGO_URL || 'mongodb://localhost:27017/taskshareDev';
 const configOptions = {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -10,7 +10,7 @@ const configOptions = {
     useFindAndModify: false,
 };
 
-mongoose.connect(MONGO_URL, configOptions)
+mongoose.connect(url, configOptions)
     .then(() => console.log('MongoDB successfully connected...'))
     .catch(err => console.log('MongoDB connection error:', err));
 

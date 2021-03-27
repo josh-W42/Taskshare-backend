@@ -14,7 +14,6 @@ options.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 options.secretOrKey = process.env.JWT_SECRET;
 
 module.exports = passport => {
-    // Add code here
     passport.use(new Strategy(options, async (jwt_payload, done) => {
         //  We want to find a use by an id that is inside the jwt_payload
         // When we get that use back, we check to see if the user is in database.
