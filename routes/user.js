@@ -3,8 +3,11 @@ const ctrl = require('../controllers');
 const passport = require('passport');
 
 router.get('/test', ctrl.user.test);
+router.get('/:id/profile', passport.authenticate('jwt', { session: false }), ctrl.user.profile);
+
 router.post('/register', ctrl.user.register);
 router.post('/login', ctrl.user.login);
-router.get('/:id/profile', passport.authenticate('jwt', { session: false }), ctrl.user.profile);
+
+router.put('/:id/edit', passport.authenticate('jwt', { session: false }), ctrl.user.edit);
 
 module.exports = router;

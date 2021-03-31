@@ -17,7 +17,6 @@ const test = async (req, res) => {
 const register = async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
 
-  // Ok so this is when do things like check if an email already exists
   try {
     const user = await db.User.findOne({ email });
     // If found, throw an error.
@@ -115,10 +114,11 @@ const login = async (req, res) => {
 
 // Get Profile information
 const profile = async (req, res) => {
-  // Already authorized, so just find and retrieve data.
+  // Already authorized
   const _id = req.params.id;
   try {
-    // Only give away information to a logged in user.
+    // Only give away information if logged in user id
+    // is the same as the requested id.
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
     if (payload.id !== _id) throw new Error("Forbidden");
@@ -141,10 +141,86 @@ const profile = async (req, res) => {
   }  
 };
 
+// Edit User Information
+const edit = async (req, res) => {
+  // Already Authorized
+  const _id = req.params.id;
+  try {
+    // Only allow edits if logged in user id is the
+    // same as the requested id.
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const { email, firstName, lastName, oldPassword, newPassword } = req.body;
+
+    const user = await db.User.findOne({ _id });
+
+    // We have to check the email, since they must be unique.
+    if (email !== user.email) {
+      const test = await db.User.findOne({ email });
+      if (test) throw new Error("A User With That Email Already Exists.");
+    }
+
+    // if user submitted an oldPassword and newPassword
+    if (oldPassword && newPassword) {
+      // compare old password
+      const isValid = await bcrypt.compare(oldPassword, user.password);
+      if (!isValid) throw new Error("Old Password Inccorect");
+
+      const isOldPassword = await bcrypt.compare(newPassword, user.password);
+      if (isOldPassword) throw new Error("New Password Cannot Be Old Password");
+
+      // Salt and hash the password.
+      bcrypt.genSalt(12, (error, salt) => {
+        if (error) throw new Error("Salt Generation Failed");
+
+        bcrypt.hash(newPassword, salt, async (error, hash) => {
+          if (error) throw new Error("Hash Password Failure");
+
+          // We can now save that new password.
+          user.password = hash;
+          await user.save();
+        }); 
+      });
+    };
+
+    user.email = email;
+    user.firstName = firstName;
+    user.lastName = lastName;
+
+    // Save the user and the changes.
+    await user.save();
+
+    res.json({ success: true, message: "User Edit Successful." });
+
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else if (error.name === 'MongoError') {
+      const needToChange = error.keyPattern;
+      res.status(409).json({
+        success: false,
+        message: "DataBase Error",
+        needToChange
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
   register,
   login,
   profile,
+  edit,
 };
