@@ -15,7 +15,9 @@ const test = async (req, res) => {
 
 // Registering a new User. And Log in
 const register = async (req, res) => {
-  const { email, password, firstName, lastName } = req.body;
+  let { email, password, firstName, lastName, isGuest } = req.body;
+
+  isGuest = isGuest ? true : false;
 
   try {
     const user = await db.User.findOne({ email });
@@ -28,6 +30,7 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
+      isGuest
     });
 
     // Salt and hash the password.

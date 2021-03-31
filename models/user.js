@@ -20,10 +20,10 @@ const userSchema = new Schema({
     required: true,
     minLength: 8
   },
-  prefersDarkMode: {
+  isGuest: {
     type: Boolean,
-    default: false,
-  },
+    default: false
+  }
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
