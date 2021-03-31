@@ -5,6 +5,12 @@ const multer = require("multer");
 const uploads = multer({ dest: "./uploads" });
 
 router.get('/test', ctrl.workspace.test);
+router.get("/all", ctrl.workspace.readMany);
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.workspace.readOne,
+);
 
 router.post(
   "/create",

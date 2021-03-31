@@ -42,6 +42,14 @@ const create = async (req, res) => {
     // Find the user
     const user = await db.User.findOne({ _id: payload.id });   
 
+    // create workspace
+    const workspace = await db.Workspace.create({
+      name,
+      imageUrl,
+      rooms: new Map(),
+      members: new Map(),
+    });
+    
     // Make a member
     const member = await db.Member.create({
       firstName: user.firstName,
@@ -49,19 +57,21 @@ const create = async (req, res) => {
       nickName: "",
       bio: "",
       userId: user._id,
+      workspaceId: workspace._id,
       imageUrl: "default Img",
       role: ['admin', 'member'],
       permissions: ['*'],
       rooms: new Map(),
     });
-
-    // create workspace
-    const workspace = await db.Workspace.create({
-      name,
-      imageUrl,
-      rooms: new Map(),
-      members: [member._id]
+    
+    // Add the new member to the workspace.
+    workspace.members.set(member.id, {
+      firstName: member.firstName,
+      lastName: member.lastName,
+      imageUrl: member.imageUrl,
     });
+
+    await workspace.save();
 
     res.status(201).json({ success: true, message: "Workspace created" });
     
@@ -82,7 +92,54 @@ const create = async (req, res) => {
   }
 }
 
-// Get Workspace data
+// Get Workspace data for one workspace.
+const readOne = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // First find the data base
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+
+    // Check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member) throw new Error("Forbidden");
+
+    res.json({ success: true, result: workspace });
+
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be a Member Of That Workspace To Access Data",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
+// Get all Workspaces
+const readMany = async (req, res) => {
+  // This route isn't protected, but I do limit the data returned
+  try {
+    // Get all
+    const results = await db.Workspace.find({}).select('-rooms -members');
+
+    res.json({success: true, count: results.length, results })
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
 
 // Edit Workspace
 
@@ -92,4 +149,6 @@ const create = async (req, res) => {
 module.exports = {
   test,
   create,
+  readOne,
+  readMany,
 };

@@ -19,6 +19,10 @@ const memberSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
+  workspaceId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Workspace',
+  },
   imageUrl: {
     type: String,
   },

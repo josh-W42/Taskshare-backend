@@ -127,7 +127,7 @@ const profile = async (req, res) => {
 
     const user = await db.User.findOne({ _id }).select('-password');
 
-    res.json({ success: true, user });
+    res.json({ success: true, result: user });
   } catch (error) {
     if (error.message === "Forbidden") {
       res.status(403).json({
