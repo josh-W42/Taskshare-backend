@@ -9,6 +9,7 @@ router.post('/register', ctrl.user.register);
 router.post('/login', ctrl.user.login);
 
 router.put('/:id/edit', passport.authenticate('jwt', { session: false }), ctrl.user.edit);
+router.put('/:userId/addWorkSpace/:workId', passport.authenticate('jwt', { session: false }), ctrl.user.addWorkspace);
 
 router.delete('/:id/delete', passport.authenticate('jwt', { session: false }), ctrl.user.remove);
 

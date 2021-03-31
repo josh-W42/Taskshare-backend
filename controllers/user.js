@@ -253,6 +253,42 @@ const remove = async (req, res) => {
   }
 };
 
+const addWorkspace = async (req, res) => {
+  // When a user follows the invite link they have a choice to
+  // join a workspace.. they must be logged in
+  const userId = req.params.userId;
+  const workspaceId = req.params.workId;
+  try {
+    // find the current user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    // check if user is deleting only themselves
+    if (payload.id !== userId) throw new Error("Forbidden");
+
+    // find user and workspace
+    const user = await db.User.findOne({ _id: userId });
+    const workspace = await db.Workspace.findOne({ _id: workspaceId });
+
+    // check if workspace exists.
+    if (!worksapce) throw new Error('Workspace Does Not Exist!');
+
+    // check if already in workspace.
+    if (user.workSpaces.includes(workspace._id)) throw new Error('Already Joined That Workspace!');
+
+    // After passing tests, add workspace and save.
+    user.workSpaces.push(workspace);
+    await user.save();
+
+    res.json({ success: true, message: "Successfully Joined Workspace."});
+    
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    }); 
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
@@ -261,4 +297,5 @@ module.exports = {
   profile,
   edit,
   remove,
+  addWorkspace,
 };
