@@ -114,9 +114,31 @@ const login = async (req, res) => {
 };
 
 // Get Profile information
-const profile = (req, res) => {
-  
-  
+const profile = async (req, res) => {
+  // Already authorized, so just find and retrieve data.
+  const _id = req.params.id;
+  try {
+    // Only give away information to a logged in user.
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const user = await db.User.findOne({ _id }).select('-password');
+
+    res.json({ success: true, user });
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }  
 };
 
 // export all route functions
