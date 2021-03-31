@@ -1,6 +1,5 @@
 // imports
 require("dotenv").config();
-const passport = require("passport");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
@@ -256,6 +255,8 @@ const remove = async (req, res) => {
   }
 };
 
+// User Joins a Workspace
+// TODO
 const addWorkspace = async (req, res) => {
   // When a user follows the invite link they have a choice to
   // join a workspace.. they must be logged in
@@ -281,6 +282,7 @@ const addWorkspace = async (req, res) => {
     // After passing tests, add workspace and save.
     user.workSpaces.push(workspace);
     await user.save();
+
 
     res.json({ success: true, message: "Successfully Joined Workspace."});
     

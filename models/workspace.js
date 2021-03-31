@@ -17,12 +17,7 @@ const workspaceSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
-  members: [
-    [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Member" },
-      { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    ]
-  ],
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: "Member" }],
 }, { timestamps: true });
 
 // Rooms will be stored as a map with the key being the id,
