@@ -15,6 +15,10 @@ const memberSchema = new Schema({
   bio: {
     type: String,    
   },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
   imageUrl: {
     type: String,
   },
