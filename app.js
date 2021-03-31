@@ -18,12 +18,18 @@ app.use(cors()); // allow all CORS requests
 app.use(passport.initialize());
 
 // API Routes
-app.get('/api/', (req, res) => {
-  res.json({ name: 'MERN Auth API', greeting: 'Welcome to the our API', author: 'YOU', message: "Smile, you are being watched by the Backend Engineering Team" });
+app.get("/api/", (req, res) => {
+  res.json({
+    name: "TaskShare API",
+    greeting: "Welcome to the TS API",
+    author: "Joshua Wilson",
+    message: "You made it!",
+  });
 });
 
 app.use('/api/examples', routes.example);
 app.use('/api/users', routes.user);
+app.use('/api/workspaces', routes.workspace);
 
 // Server
 const server = app.listen(PORT, () => console.log(`Server is running on PORT: ${PORT}`));
