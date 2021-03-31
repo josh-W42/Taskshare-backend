@@ -17,4 +17,11 @@ mongoose.connect(url, configOptions)
 module.exports = {
     Example: require('./example'),
     User: require('./user'),
+    Workspace: require('./workspace'),
+    Member: require('./member'),
+    Room: require('./room'),
+    Post: require('./post'),
+    Comment: require('./comment'),
+    Task: require('./task'),
+    Reaction: require('./reaction'),
 }
