@@ -21,6 +21,7 @@ const workspaceSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
+  allowedEmails: [String],
 }, { timestamps: true });
 
 // Rooms will be stored as a map with the key being the id,

@@ -16,7 +16,13 @@ router.post(
   "/create",
   passport.authenticate("jwt", { session: false }),
   uploads.single("workspaceImg"),
-  ctrl.workspace.create
+  ctrl.workspace.create,
+);
+
+router.put(
+  "/:id/changeName",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.workspace.changeName,
 );
 
 module.exports = router;

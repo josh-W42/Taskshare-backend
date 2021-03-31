@@ -46,9 +46,13 @@ const create = async (req, res) => {
     const workspace = await db.Workspace.create({
       name,
       imageUrl,
+      inviteLink: "",
       rooms: new Map(),
       members: new Map(),
     });
+
+    // Add invite Link:
+    workspace.inviteLink = `<PublicDomain>/join/${workspace.id}`;
     
     // Make a member
     const member = await db.Member.create({
@@ -130,7 +134,7 @@ const readMany = async (req, res) => {
   // This route isn't protected, but I do limit the data returned
   try {
     // Get all
-    const results = await db.Workspace.find({}).select('-rooms -members');
+    const results = await db.Workspace.find({}).select('-rooms -members -inviteLink');
 
     res.json({success: true, count: results.length, results })
   } catch (error) {
@@ -141,7 +145,45 @@ const readMany = async (req, res) => {
   }
 }
 
-// Edit Workspace
+// Change Workspace Name
+const changeName = async (req, res) => {
+  const workspaceId = req.params.id;
+  const { name } = req.body;
+  try {
+    // check the name
+    const test = await db.Workspace.findOne({ name });
+    if (test) throw new Error("Workspace With That Name Already Exists");
+
+    // find the workspace
+    const workspace = await db.Workspace.findOne({ _id: workspaceId });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+
+    // check if admin
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member || !member.role.includes('admin')) throw new Error("Forbidden");
+
+    // change the name
+    workspace.name = name;
+    await workspace.save();
+
+    res.json({ success: true, message: "Workspace Name Changed" });
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Admin Of This Workspace.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
 
 // Delete Workspace
 
@@ -151,4 +193,5 @@ module.exports = {
   create,
   readOne,
   readMany,
+  changeName,
 };
