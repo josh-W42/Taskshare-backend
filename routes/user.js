@@ -10,4 +10,6 @@ router.post('/login', ctrl.user.login);
 
 router.put('/:id/edit', passport.authenticate('jwt', { session: false }), ctrl.user.edit);
 
+router.delete('/:id/delete', passport.authenticate('jwt', { session: false }), ctrl.user.remove);
+
 module.exports = router;

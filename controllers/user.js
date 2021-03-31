@@ -216,6 +216,43 @@ const edit = async (req, res) => {
   }
 }
 
+// Route to Delete a User
+const remove = async (req, res) => {
+  // id of user to delete
+  const _id = req.params.id;
+  try {
+    // find the current user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    // check if user is deleting only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const user = await db.User.findOne({ _id });
+    
+    // then delete from db
+    await user.delete();
+
+    res.status(200).json({
+      success: true,
+      message: "User Deleted",
+    });
+
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
@@ -223,4 +260,5 @@ module.exports = {
   login,
   profile,
   edit,
+  remove,
 };
