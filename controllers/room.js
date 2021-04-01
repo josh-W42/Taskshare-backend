@@ -20,7 +20,7 @@ const create = async (req, res) => {
     const payload = jwt.decode(token);
 
     const member = await db.Member.findOne({ userId: payload.id, workspaceId });
-    if (!member) throw new Error("Forbidden");
+    if (!member) throw new Error("Forbidden - Not A Member");
     
     if (!member.role.includes('admin')) {
       // determine privacy type
@@ -28,7 +28,7 @@ const create = async (req, res) => {
       validPermissions.push(isPrivate ? 'create-private-room' : 'create-public-room');
       // run test
       const test = member.permissions.filter((permission) => validPermissions.includes(permission));
-      if (test.length === 0) throw new Error("Forbidden");
+      if (test.length === 0) throw new Error("Forbidden - Invalid Permissions");
     }
 
     // room uniqueness test
@@ -54,16 +54,38 @@ const create = async (req, res) => {
       tasks: [],
     });
 
+    // add room to member instance
+    member.rooms.set(room.id, {
+      name: room.name,
+      isPrivate: room.isPrivate,
+    });
+
+    await member.save();
+
+    // add room to workspace instance.
+    const workspace = await db.Workspace.findOne({ _id: workspaceId });
+    workspace.rooms.set(room.id, {
+      name: room.name,
+      isPrivate: room.isPrivate,
+    });
+
+    await workspace.save();
+
     res.status(201).json({
       success: true,
       message: "Room Creation Successfull.",
-    })
+    });
     
   } catch (error) {
-    if (error.message === "Forbidden") {
+    if (error.message === "Forbidden - Not A Member") {
       res.status(403).json({
         success: false,
-        message: "You Are Not An Admin Of This Workspace.",
+        message: "You Are Not An Member Of This Workspace.",
+      });
+    } else if (error.message === "Forbidden - Invalid Permissions") {
+      res.status(403).json({
+        success: false,
+        message: "Invalid Permissions",
       });
     } else if (error.name === "MongoError") {
       const needToChange = error.keyPattern;
