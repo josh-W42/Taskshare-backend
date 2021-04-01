@@ -275,6 +275,13 @@ const addWorkspace = async (req, res) => {
     // check if workspace exists.
     if (!workspace) throw new Error('Workspace Does Not Exist!');
 
+    // check if allowed to join
+    if (
+      !workspace.allowedEmails.includes(user.email) &&
+      !workspace.allowedEmails.includes("*")
+    )
+      throw new Error("Not On Email List");
+
     // check if already in workspace.
     if (user.workSpaces.includes(workspace._id)) throw new Error('Already Joined That Workspace!');
 
