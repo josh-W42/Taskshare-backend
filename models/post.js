@@ -26,13 +26,13 @@ const postSchema = new Schema({
 
 // Upon delete, remove all posts and tasks.
 postSchema.pre('remove', function(next) {
-  Comment.remove({postId: this._id}).exec();
+  Comment.deleteMany({postId: this._id}).exec();
   next();
 });
 
 // poster will store user id as key and then store image url and name.
 
-// comments will store comment id as key then store commentor id,
+// comments will store comment id as key then store commenter id,
 //  image url and name.
 
 // content will have text information but also image information depending

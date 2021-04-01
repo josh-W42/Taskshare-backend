@@ -52,6 +52,7 @@ const create = async (req, res) => {
       posts: new Map(),
       members: memberMap,
       tasks: [],
+      createdByAdmin: member.role.includes("admin"),
     });
 
     // add room to member instance
@@ -141,9 +142,44 @@ const remove = async (req, res) => {
 
   try {
     // check room existence
+    const room = await db.Room.findOne({ _id });
+    if (!room) throw new Error("Room Does Not Exist");
+
+    // check if member
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({
+      userId: payload.id,
+      workspaceId: room.workspaceId,
+    });
+    if (!member) throw new Error("Forbidden - Not A Member");
+    // check room properties. if created by an admin, only an admin can delete it.
+    if (room.createdByAdmin && !member.role.includes("admin"))
+      throw new Error("Forbidden - Invalid Permissions");
+
+    // proceed with delete
+    await room.delete();
+
+    res.json({ success: true, message: "Room Deleted Successfully" });
 
   } catch (error) {
-    
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Member Of This Workspace.",
+      });
+    } else if (error.message === "Forbidden - Invalid Permissions") {
+      res.status(403).json({
+        success: false,
+        message: "Invalid Permissions",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 }
 

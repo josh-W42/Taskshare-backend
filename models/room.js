@@ -16,6 +16,10 @@ const roomSchema = new Schema({
   description: {
     type: String,
   },
+  createdByAdmin: {
+    type: Boolean,
+    default: false,
+  },
   isPrivate: {
     type: Boolean,
     default: false,
@@ -36,8 +40,8 @@ const roomSchema = new Schema({
 
 // Upon delete, remove all posts and tasks.
 roomSchema.pre('remove', function(next) {
-  Post.remove({roomId: this._id}).exec();
-  Task.remove({roomId: this._id}).exec();
+  Post.deleteMany({roomId: this._id}).exec();
+  Task.deleteMany({roomId: this._id}).exec();
   next();
 });
 

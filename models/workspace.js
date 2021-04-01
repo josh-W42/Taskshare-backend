@@ -7,7 +7,7 @@ const workspaceSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unqiue: true,
+    unique: true,
   },
   inviteLink: {
     type: String,
@@ -32,8 +32,8 @@ const workspaceSchema = new Schema({
 
 // Upon delete, remove all rooms and members.
 workspaceSchema.pre('remove', function(next) {
-  Room.remove({workspaceId: this._id}).exec();
-  Member.remove({workspaceId: this._id}).exec();
+  Room.deleteMany({workspaceId: this._id}).exec();
+  Member.deleteMany({workspaceId: this._id}).exec();
   next();
 });
 
