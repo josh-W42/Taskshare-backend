@@ -4,7 +4,7 @@ const passport = require('passport');
 
 router.get('/test', ctrl.room.test);
 router.get(
-  '/:id',
+  "/:id",
   passport.authenticate('jwt', { session: false }),
   ctrl.room.readOne,
 );

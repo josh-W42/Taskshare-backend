@@ -148,6 +148,41 @@ const readMany = async (req, res) => {
   }
 }
 
+// Get all Rooms
+const findRooms = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // check workspace existance
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+
+    // Check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member) throw new Error("Forbidden");
+
+    const results = workspace.rooms;
+
+    // Return Data
+    res.json({ success: true, count: results.size, results });
+
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not A Member Of That Workspace.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Change Workspace Name
 const changeName = async (req, res) => {
   const workspaceId = req.params.id;
@@ -279,6 +314,7 @@ module.exports = {
   create,
   readOne,
   readMany,
+  findRooms,
   changeName,
   changePicture,
   remove,

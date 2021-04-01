@@ -11,6 +11,11 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   ctrl.workspace.readOne,
 );
+router.get(
+  "/:id/rooms",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.workspace.findRooms,
+)
 
 router.post(
   "/create",
