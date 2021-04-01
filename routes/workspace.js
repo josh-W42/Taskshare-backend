@@ -24,5 +24,11 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   ctrl.workspace.changeName,
 );
+router.put(
+  "/:id/changePicture",
+  passport.authenticate("jwt", { session: false }),
+  uploads.single("workspaceImg"),
+  ctrl.workspace.changePicture,
+)
 
 module.exports = router;

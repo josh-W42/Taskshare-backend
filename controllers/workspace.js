@@ -26,7 +26,7 @@ const create = async (req, res) => {
       let image = req.file.path;
       try {
         const result = await cloudinary.uploader.upload(image);
-        coverUrl = result.secure_url;
+        imageUrl = result.secure_url;
       } catch (error) {
         throw new Error("Could Not Upload To Cloudinary");
         imageUrl = ""
@@ -185,6 +185,42 @@ const changeName = async (req, res) => {
   }
 }
 
+// change workspace picture
+const changePicture = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // check if workspace exists
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exists");
+
+    // Upload
+    let imageUrl = workspace.imageUrl;
+    if (req.file) {
+      let image = req.file.path;
+      try {
+        const result = await cloudinary.uploader.upload(image);
+        imageUrl = result.secure_url;
+      } catch (error) {
+        throw new Error("Could Not Upload To Cloudinary");
+      }
+    }
+
+    // save
+    workspace.imageUrl = imageUrl;
+    await workspace.save();
+
+    res.json({ success: true, message: "Profile Picture Changed" });
+
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+}
+
 // Delete Workspace
 
 // export all route functions
@@ -194,4 +230,5 @@ module.exports = {
   readOne,
   readMany,
   changeName,
+  changePicture,
 };
