@@ -206,6 +206,13 @@ const changePicture = async (req, res) => {
       }
     }
 
+    // check if admin
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member || !member.role.includes('admin')) throw new Error("Forbidden");
+
     // save
     workspace.imageUrl = imageUrl;
     await workspace.save();
