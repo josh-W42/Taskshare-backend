@@ -287,9 +287,7 @@ const addWorkspace = async (req, res) => {
 
     // After passing tests, add workspace and save.
     user.workSpaces.push(workspace);
-    console.log("Here")
     await user.save();
-    console.log("Here")
 
     // Make a new member
     const member = await db.Member.create({

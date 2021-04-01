@@ -297,12 +297,11 @@ const addEmail = async (req, res) => {
     if (!workspace.allowedEmails.includes('*')) {
       if (member.role.includes('admin') || member.permissions.includes('add-workspace-members')) {
         workspace.allowedEmails.push(email);
+        await workspace.save();
       } else {
         throw new Error("Forbidden - Invalid Permissions");
       }
     }
-
-    await workspace.save();
 
     res.json({ success: true, message: "Email Added Successfully" });
 
