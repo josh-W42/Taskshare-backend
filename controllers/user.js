@@ -256,7 +256,6 @@ const remove = async (req, res) => {
 };
 
 // User Joins a Workspace
-// TODO
 const addWorkspace = async (req, res) => {
   // When a user follows the invite link they have a choice to
   // join a workspace.. they must be logged in
@@ -266,7 +265,7 @@ const addWorkspace = async (req, res) => {
     // find the current user
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
-    // check if user is deleting only themselves
+    // check if user is adding only themselves.
     if (payload.id !== userId) throw new Error("Forbidden");
 
     // find user and workspace
@@ -283,6 +282,29 @@ const addWorkspace = async (req, res) => {
     user.workSpaces.push(workspace);
     await user.save();
 
+    // Make a new member
+    const member = await db.Member.create({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      nickName: "",
+      bio: "",
+      userId: user._id,
+      workspaceId: workspace._id,
+      imageUrl: "default Img",
+      role: ['member'],
+      permissions: workspace.newMemberPermissions,
+      rooms: new Map(),
+    });
+
+    // Add the new member to the workspace.
+    workspace.members.set(member.id, {
+      firstName: member.firstName,
+      lastName: member.lastName,
+      nickName: member.nickName,
+      imageUrl: member.imageUrl,
+    });
+
+    await workspace.save();
 
     res.json({ success: true, message: "Successfully Joined Workspace."});
     

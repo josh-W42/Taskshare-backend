@@ -24,6 +24,10 @@ const workspaceSchema = new Schema({
     of: Schema.Types.Mixed,
   },
   allowedEmails: [String],
+  newMemberPermissions: {
+    type: [String],
+    default: ['create-public-room', 'add-workspace-members']
+  },
 }, { timestamps: true });
 
 // Upon delete, remove all rooms and members.

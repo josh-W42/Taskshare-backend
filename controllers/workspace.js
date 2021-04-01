@@ -72,6 +72,7 @@ const create = async (req, res) => {
     workspace.members.set(member.id, {
       firstName: member.firstName,
       lastName: member.lastName,
+      nickName: member.nickName,
       imageUrl: member.imageUrl,
     });
 
@@ -102,7 +103,7 @@ const readOne = async (req, res) => {
 
   try {
     // First find the data base
-    const workspace = await db.Workspace.findOne({ _id });
+    const workspace = await db.Workspace.findOne({ _id }).select("-allowedEmails");
     if (!workspace) throw new Error("Workspace Does Not Exist");
 
     // Check if member
@@ -134,7 +135,9 @@ const readMany = async (req, res) => {
   // This route isn't protected, but I do limit the data returned
   try {
     // Get all
-    const results = await db.Workspace.find({}).select('-rooms -members -inviteLink');
+    const results = await db.Workspace.find({}).select(
+      "-rooms -members -inviteLink -allowedEmails -newMemberPermissions"
+    );
 
     res.json({success: true, count: results.length, results })
   } catch (error) {
