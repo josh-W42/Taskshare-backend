@@ -220,15 +220,55 @@ const changePicture = async (req, res) => {
     res.json({ success: true, message: "Profile Picture Changed" });
 
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Admin Of This Workspace.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
-
 }
 
 // Delete Workspace
+const remove = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // Check if workspace exists.
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+
+    // check if admin
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member || !member.role.includes('admin')) throw new Error("Forbidden");
+
+    // Delete the workspace
+    await workspace.delete();
+
+    res.json({ success: true, message: "Workspace Deleted" });
+    
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Admin Of This Workspace.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
 
 // export all route functions
 module.exports = {
@@ -238,4 +278,5 @@ module.exports = {
   readMany,
   changeName,
   changePicture,
+  remove,
 };

@@ -29,6 +29,12 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   uploads.single("workspaceImg"),
   ctrl.workspace.changePicture,
-)
+);
+
+router.delete(
+  "/:id/delete",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.workspace.remove,
+);
 
 module.exports = router;
