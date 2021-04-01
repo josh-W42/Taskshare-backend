@@ -1,7 +1,7 @@
 module.exports = {
-  example: require('./example'),
   user: require('./user'),
   workspace: require('./workspace'),
+  room: require('./room'),
 }
 
 

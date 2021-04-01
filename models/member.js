@@ -1,6 +1,22 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+/*
+  Possible Member Permissions:
+    * -
+      Can Do All Except Workspace Modification / Deletion.
+
+    add-workspace-members -
+      Has access to the workspace invite link and 
+      can add an email to the list of accepted emails.
+
+    create-public-room -
+      Can create public rooms in workspace.
+
+    create-private-room -
+      Can create private rooms
+*/
+
 const memberSchema = new Schema({
   firstName: {
     type: String,
