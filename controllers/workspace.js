@@ -49,6 +49,7 @@ const create = async (req, res) => {
       inviteLink: "",
       rooms: new Map(),
       members: new Map(),
+      allowedEmails: new Map(),
     });
 
     // Add invite Link:

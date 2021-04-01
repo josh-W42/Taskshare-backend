@@ -23,7 +23,10 @@ const workspaceSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
-  allowedEmails: [String],
+  allowedEmails: {
+    type: Map,
+    of: String
+  },
   newMemberPermissions: {
     type: [String],
     default: ['create-public-room', 'add-workspace-members']

@@ -277,8 +277,8 @@ const addWorkspace = async (req, res) => {
 
     // check if allowed to join
     if (
-      !workspace.allowedEmails.includes(user.email) &&
-      !workspace.allowedEmails.includes("*")
+      !workspace.allowedEmails.has(user.email) &&
+      !workspace.allowedEmails.has("*")
     )
       throw new Error("Not On Email List");
 
