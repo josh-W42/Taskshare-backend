@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Member = require('./member');
+const Room = require('./room');
 const { Schema } = mongoose;
 
 const workspaceSchema = new Schema({
@@ -23,6 +25,13 @@ const workspaceSchema = new Schema({
   },
   allowedEmails: [String],
 }, { timestamps: true });
+
+// Upon delete, remove all rooms and members.
+workspaceSchema.pre('remove', function(next) {
+  Room.remove({workspaceId: this._id}).exec();
+  Member.remove({workspaceId: this._id}).exec();
+  next();
+});
 
 // Rooms will be stored as a map with the key being the id,
 // and the value being some data about it, but not everything.

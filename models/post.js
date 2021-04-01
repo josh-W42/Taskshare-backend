@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Comment = require('./comment');
 const { Schema } = mongoose;
 
 const postSchema = new Schema({
@@ -10,6 +11,10 @@ const postSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
+  roomId: {
+    type: Schema.Types.ObjectId,
+    ref: "Room",
+  },
   content: {
     type: Schema.Types.Mixed,
   },
@@ -18,6 +23,12 @@ const postSchema = new Schema({
     of: Schema.Types.Mixed, 
   },
 }, { timestamps: true });
+
+// Upon delete, remove all posts and tasks.
+postSchema.pre('remove', function(next) {
+  Comment.remove({postId: this._id}).exec();
+  next();
+});
 
 // poster will store user id as key and then store image url and name.
 

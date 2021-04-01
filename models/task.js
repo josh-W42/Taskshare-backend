@@ -9,6 +9,10 @@ const taskSchema = new Schema({
   deadline: {
     type: Date,
   },
+  roomId: {
+    type: Schema.Types.ObjectId,
+    ref: "Room",
+  },
   isCompleted: {
     type: Boolean,
     default: false,

@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Post = require('./post');
+const Task = require('./task');
 const { Schema } = mongoose;
 
 const roomSchema = new Schema({
@@ -7,13 +9,17 @@ const roomSchema = new Schema({
     required: true,
     unqiue: true,
   },
+  workspaceId: {
+    type: Schema.Types.ObjectId,
+    ref: "Workspace",
+  },
   isPrivate: {
     type: Boolean,
     default: false,
   },
   posts: {
     type: Map,
-    ref: "Post",
+    of: Schema.Types.Mixed,
   },
   members: {
     type: Map,
@@ -24,6 +30,13 @@ const roomSchema = new Schema({
     ref: "Task",
   }],
 }, { timestamps: true });
+
+// Upon delete, remove all posts and tasks.
+roomSchema.pre('remove', function(next) {
+  Post.remove({roomId: this._id}).exec();
+  Task.remove({roomId: this._id}).exec();
+  next();
+});
 
 // Members will store object id as a key and just the name and image
 
