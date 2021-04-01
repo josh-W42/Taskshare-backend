@@ -103,8 +103,42 @@ const create = async (req, res) => {
   }
 };
 
+// Get data for one Room
+const readOne = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the room
+    const room = await db.Room.findOne({ _id });
+    if (!room) throw new Error("Room Does Not Exist");
+
+    // check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: room.workspaceId });
+    if (!member) throw new Error("Forbidden");
+
+    // return room data
+
+    res.json({ success: true, result: room });
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Member Of This Room.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
   create,
+  readOne,
 };

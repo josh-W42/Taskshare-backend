@@ -3,6 +3,11 @@ const ctrl = require('../controllers');
 const passport = require('passport');
 
 router.get('/test', ctrl.room.test);
+router.get(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  ctrl.room.readOne,
+);
 
 router.post(
   "/create",
