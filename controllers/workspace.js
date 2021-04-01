@@ -49,7 +49,6 @@ const create = async (req, res) => {
       inviteLink: "",
       rooms: new Map(),
       members: new Map(),
-      allowedEmails: new Map(),
     });
 
     // Add invite Link:
@@ -273,6 +272,60 @@ const changePicture = async (req, res) => {
   }
 }
 
+// Add an email to the allowed email list
+const addEmail = async (req, res) => {
+  const _id = req.params.id;
+  const { email } = req.body;
+  try {
+    // check Input
+    if (!email) throw new Error("Empty Input");
+    // Also check to make sure the user isn't trying to add the special character '*'
+    if (email === '*') throw new Error('Invalid Input - Nice Try');
+
+    // check workspace existence
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+
+    // check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member) throw new Error("Forbidden - Not A Member");
+
+    // check permissions
+    if (!workspace.allowedEmails.includes('*')) {
+      if (member.role.includes('admin') || member.permissions.includes('add-workspace-members')) {
+        workspace.allowedEmails.push(email);
+      } else {
+        throw new Error("Forbidden - Invalid Permissions");
+      }
+    }
+
+    await workspace.save();
+
+    res.json({ success: true, message: "Email Added Successfully" });
+
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Member Of This Workspace.",
+      });
+    } else if (error.message === "Forbidden - Invalid Permissions") {
+      res.status(403).json({
+        success: false,
+        message: "Invalid Permissions",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Delete Workspace
 const remove = async (req, res) => {
   const _id = req.params.id;
@@ -318,5 +371,6 @@ module.exports = {
   findRooms,
   changeName,
   changePicture,
+  addEmail,
   remove,
 };

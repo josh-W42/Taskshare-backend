@@ -277,8 +277,8 @@ const addWorkspace = async (req, res) => {
 
     // check if allowed to join
     if (
-      !workspace.allowedEmails.has(user.email) &&
-      !workspace.allowedEmails.has("*")
+      !workspace.allowedEmails.includes(user.email) &&
+      !workspace.allowedEmails.includes("*")
     )
       throw new Error("Not On Email List");
 
@@ -287,7 +287,9 @@ const addWorkspace = async (req, res) => {
 
     // After passing tests, add workspace and save.
     user.workSpaces.push(workspace);
+    console.log("Here")
     await user.save();
+    console.log("Here")
 
     // Make a new member
     const member = await db.Member.create({

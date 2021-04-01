@@ -35,6 +35,11 @@ router.put(
   uploads.single("workspaceImg"),
   ctrl.workspace.changePicture,
 );
+router.put(
+  "/:id/addEmail",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.workspace.addEmail,
+)
 
 router.delete(
   "/:id/delete",
