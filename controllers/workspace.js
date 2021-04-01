@@ -35,7 +35,7 @@ const create = async (req, res) => {
       imageUrl = ""
     }
 
-    // The user that intialized the create is the first member and admin
+    // The user that initialized the create is the first member and admin
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
 
@@ -152,7 +152,7 @@ const readMany = async (req, res) => {
 const findRooms = async (req, res) => {
   const _id = req.params.id;
   try {
-    // check workspace existance
+    // check workspace existence
     const workspace = await db.Workspace.findOne({ _id });
     if (!workspace) throw new Error("Workspace Does Not Exist");
 

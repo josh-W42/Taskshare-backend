@@ -168,7 +168,7 @@ const edit = async (req, res) => {
     if (oldPassword && newPassword) {
       // compare old password
       const isValid = await bcrypt.compare(oldPassword, user.password);
-      if (!isValid) throw new Error("Old Password Inccorect");
+      if (!isValid) throw new Error("Old Password Incorrect");
 
       const isOldPassword = await bcrypt.compare(newPassword, user.password);
       if (isOldPassword) throw new Error("New Password Cannot Be Old Password");
@@ -273,7 +273,7 @@ const addWorkspace = async (req, res) => {
     const workspace = await db.Workspace.findOne({ _id: workspaceId });
 
     // check if workspace exists.
-    if (!worksapce) throw new Error('Workspace Does Not Exist!');
+    if (!workspace) throw new Error('Workspace Does Not Exist!');
 
     // check if already in workspace.
     if (user.workSpaces.includes(workspace._id)) throw new Error('Already Joined That Workspace!');

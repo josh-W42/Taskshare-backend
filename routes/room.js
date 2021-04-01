@@ -12,7 +12,13 @@ router.get(
 router.post(
   "/create",
   passport.authenticate('jwt', { session: false }),
-  ctrl.room.create
+  ctrl.room.create,
+);
+
+router.delete(
+  "/:id/delete",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.room.remove,
 );
 
 module.exports = router;

@@ -7,7 +7,7 @@ const db = require("../models");
 // basic test
 const test = async (req, res) => {
   res.json({ message: "Room endpoint OK!" });
-};
+}
 
 // create a room
 const create = async (req, res) => {
@@ -73,7 +73,7 @@ const create = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Room Creation Successfull.",
+      message: "Room Creation Successful.",
     });
     
   } catch (error) {
@@ -101,7 +101,7 @@ const create = async (req, res) => {
       });
     }
   }
-};
+}
 
 // Get data for one Room
 const readOne = async (req, res) => {
@@ -134,11 +134,23 @@ const readOne = async (req, res) => {
       });
     }
   }
-};
+}
+
+const remove = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // check room existence
+
+  } catch (error) {
+    
+  }
+}
 
 // export all route functions
 module.exports = {
   test,
   create,
   readOne,
-};
+  remove,
+}

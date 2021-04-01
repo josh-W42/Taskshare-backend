@@ -7,11 +7,14 @@ const roomSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unqiue: true,
+    unique: true,
   },
   workspaceId: {
     type: Schema.Types.ObjectId,
     ref: "Workspace",
+  },
+  description: {
+    type: String,
   },
   isPrivate: {
     type: Boolean,
