@@ -14,4 +14,10 @@ router.get(
   ctrl.member.readOneAdmin,
 );
 
+router.delete(
+  "/:id/remove",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.member.remove,
+);
+
 module.exports = router;

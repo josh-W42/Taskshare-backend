@@ -158,6 +158,17 @@ const remove = async (req, res) => {
     if (room.createdByAdmin && !member.role.includes("admin"))
       throw new Error("Forbidden - Invalid Permissions");
 
+    // Updates to models must occur here rather than in the model to avoid hierarchy errors.
+    // This Basically searches for the room data in the Member and Workspace Models and deletes that room entry
+    db.Member.updateMany(
+      { [`rooms.${room._id}`]: { $exists: true } },
+      { $unset: { [`rooms.${room._id}`]: 1 } }
+    ).exec();
+    db.Workspace.updateOne(
+      { _id: room.workspaceId },
+      { $unset: { [`rooms.${room._id}`]: 1 } }
+    ).exec();
+
     // proceed with delete
     await room.delete();
 
