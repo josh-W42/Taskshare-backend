@@ -199,9 +199,9 @@ const findMembers = async (req, res) => {
     if (!member) throw new Error("Forbidden");
 
     // return members
-    const results = workspace.members;
+    const results = await db.Member.find({ workspaceId: workspace.id });
 
-    res.json({ success: true, results: results, count: results.size });
+    res.json({ success: true, results: results, count: results.length });
   } catch (error) {
     if (error.message === "Forbidden") {
       res.status(403).json({
