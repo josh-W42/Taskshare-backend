@@ -263,7 +263,7 @@ const addWorkspace = async (req, res) => {
   const workspaceId = req.params.workId;
   try {
     // find the current user
-    const [type, token] = req.headers.authorization.split(' ');
+    const [type, token] = req.headers.authorization.split(" ");
     const payload = jwt.decode(token);
     // check if user is adding only themselves.
     if (payload.id !== userId) throw new Error("Forbidden");
@@ -273,17 +273,18 @@ const addWorkspace = async (req, res) => {
     const workspace = await db.Workspace.findOne({ _id: workspaceId });
 
     // check if workspace exists.
-    if (!workspace) throw new Error('Workspace Does Not Exist!');
+    if (!workspace) throw new Error("Workspace Does Not Exist!");
 
     // check if allowed to join
     if (
       !workspace.allowedEmails.includes(user.email) &&
-      !workspace.allowedEmails.includes("*")
+      !workspace.allowsAllEmails
     )
       throw new Error("Not On Email List");
 
     // check if already in workspace.
-    if (user.workSpaces.includes(workspace._id)) throw new Error('Already Joined That Workspace!');
+    if (user.workSpaces.includes(workspace._id))
+      throw new Error("Already Joined That Workspace!");
 
     // After passing tests, add workspace and save.
     user.workSpaces.push(workspace);
@@ -298,7 +299,7 @@ const addWorkspace = async (req, res) => {
       userId: user._id,
       workspaceId: workspace._id,
       imageUrl: "default Img",
-      role: ['member'],
+      role: ["member"],
       permissions: workspace.newMemberPermissions,
       rooms: new Map(),
     });
@@ -313,8 +314,7 @@ const addWorkspace = async (req, res) => {
 
     await workspace.save();
 
-    res.json({ success: true, message: "Successfully Joined Workspace."});
-    
+    res.json({ success: true, message: "Successfully Joined Workspace." });
   } catch (error) {
     res.status(400).json({
       success: false,

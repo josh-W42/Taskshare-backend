@@ -39,6 +39,11 @@ router.put(
   "/:id/addEmail",
   passport.authenticate("jwt", { session: false }),
   ctrl.workspace.addEmail,
+);
+router.put(
+  "/:id/toggleAllowAll",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.workspace.toggleAllEmails,
 )
 
 router.delete(

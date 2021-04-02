@@ -279,8 +279,6 @@ const addEmail = async (req, res) => {
   try {
     // check Input
     if (!email) throw new Error("Empty Input");
-    // Also check to make sure the user isn't trying to add the special character '*'
-    if (email === '*') throw new Error('Invalid Input - Nice Try');
 
     // check workspace existence
     const workspace = await db.Workspace.findOne({ _id });
@@ -294,7 +292,7 @@ const addEmail = async (req, res) => {
     if (!member) throw new Error("Forbidden - Not A Member");
 
     // check permissions
-    if (!workspace.allowedEmails.includes('*')) {
+    if (!workspace.allowsAllEmails) {
       if (member.role.includes('admin') || member.permissions.includes('add-workspace-members')) {
         workspace.allowedEmails.push(email);
         await workspace.save();
@@ -315,6 +313,42 @@ const addEmail = async (req, res) => {
       res.status(403).json({
         success: false,
         message: "Invalid Permissions",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
+// Toggle the the allow all emails boolean
+const toggleAllEmails = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // check workspace existence
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+  
+    // check if admin
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+  
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member || !member.role.includes('admin')) throw new Error("Forbidden");
+    
+    // toggle the boolean value
+    workspace.allowsAllEmails = !workspace.allowsAllEmails;
+    await workspace.save();
+
+    res.json({ success: true, message: "Successfully Toggled All Email Field" });
+
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Admin Of This Workspace.",
       });
     } else {
       res.status(400).json({
@@ -372,4 +406,5 @@ module.exports = {
   changePicture,
   addEmail,
   remove,
+  toggleAllEmails,
 };
