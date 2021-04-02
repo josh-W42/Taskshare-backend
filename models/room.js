@@ -25,6 +25,7 @@ const roomSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  allowedMembers: [{ type: Schema.Types.ObjectId, ref: "Member" }],
   posts: {
     type: Map,
     of: Schema.Types.Mixed,
@@ -44,14 +45,6 @@ roomSchema.pre("remove", function (next) {
   Post.deleteMany({ roomId: this._id }).exec();
   Task.deleteMany({ roomId: this._id }).exec();
   next();
-});
-
-// This should auto-delete rooms if there are no members.
-roomSchema.post("update", function () {
-  console.log(this);
-  // if (this.members.size < 1) {
-  //   this.delete();
-  // }
 });
 
 // Members will store object id as a key and just the name and image

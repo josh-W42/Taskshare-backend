@@ -137,6 +137,119 @@ const readOne = async (req, res) => {
   }
 }
 
+// Joining a room.
+const join = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // check room existence
+    const room = await db.Room.findOne({ _id });
+    if (!room) throw new Error("Room Does Not Exist");
+
+    // check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: room.workspaceId });
+    if (!member) throw new Error("Forbidden - Not A Member");
+
+    // check room privacy
+    if (
+      room.isPrivate &&
+      room.allowedMembers.includes(member._id) &&
+      !member.role.includes("admin")
+    ) {
+      throw new Error("Forbidden - No Invite");
+    }
+
+    // check if already joined room
+    if (room.members.has(member.id)) throw new Error("You Already Joined This Room");
+
+    // add room member's collection
+    member.rooms.set(room.id, {
+      name: room.name,
+      isPrivate: room.isPrivate,
+    });
+    await member.save();
+
+    // add member to room's collection
+    room.members.set(member.id, {
+      firstName: member.firstName,
+      lastName: member.lastName,
+      nickName: member.nickName,
+      imageUrl: member.imageUrl,
+    });
+    await room.save();
+
+    res.json({ success: true, message: "Successfully Joined Room" });
+
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Member Of This Workspace.",
+      });
+    } else if (error.message === "Forbidden - No Invite") {
+      res.status(403).json({
+        success: false,
+        message: "Private Rooms Require An Invite To Join",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
+// Leave a Room
+const leave = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // check room existence
+    const room = await db.Room.findOne({ _id });
+    if (!room) throw new Error("Room Does Not Exist");
+
+    // check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: room.workspaceId });
+    if (!member) throw new Error("Forbidden - Not A Member");
+
+    // check if already left
+    if (!room.members.has(member.id)) throw new Error("You Have Not Joined That Room");
+
+    // delete room entry in member
+    member.rooms.delete(room.id);
+    await member.save();
+
+    // delete member entry in room
+    room.members.delete(member.id);
+    await room.save();
+
+    // If a room has zero members, delete it MAYBE Not sure yet, this is good for Debugging.
+    // if (room.members.size < 1) room.delete();
+
+    res.json({ success: true, message: "Successfully Left Room" });
+
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Member Of This Workspace.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 const remove = async (req, res) => {
   const _id = req.params.id;
 
@@ -200,4 +313,6 @@ module.exports = {
   create,
   readOne,
   remove,
+  join,
+  leave,
 }

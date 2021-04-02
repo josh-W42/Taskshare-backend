@@ -15,6 +15,17 @@ router.post(
   ctrl.room.create,
 );
 
+router.put(
+  "/:id/join",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.room.join,
+);
+router.put(
+  "/:id/leave",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.room.leave,
+);
+
 router.delete(
   "/:id/delete",
   passport.authenticate('jwt', { session: false }),

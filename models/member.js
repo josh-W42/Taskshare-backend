@@ -54,6 +54,7 @@ const memberSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
+  roomInvites: [{ type: Schema.Types.ObjectId, ref: "Room" }],
 }, { timestamps: true });
 
 // Upon delete, remove all posts and comments made by the member.
