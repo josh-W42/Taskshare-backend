@@ -183,6 +183,40 @@ const findRooms = async (req, res) => {
   }
 }
 
+// Get all members
+const findMembers = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // check workspace existence
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace Does Not Exist");
+
+    // check if member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member) throw new Error("Forbidden");
+
+    // return members
+    const results = workspace.members;
+
+    res.json({ success: true, results: results, count: results.size });
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not A Member Of That Workspace.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Change Workspace Name
 const changeName = async (req, res) => {
   const workspaceId = req.params.id;
@@ -402,6 +436,7 @@ module.exports = {
   readOne,
   readMany,
   findRooms,
+  findMembers,
   changeName,
   changePicture,
   addEmail,
