@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Comment = require('./comment');
+const Post = require('./post');
 const { Schema } = mongoose;
 
 /*
@@ -53,6 +55,13 @@ const memberSchema = new Schema({
     of: Schema.Types.Mixed,
   },
 }, { timestamps: true });
+
+// Upon delete, remove all posts and comments made by the member.
+memberSchema.pre('remove', function(next) {
+  Post.deleteMany({ posterId: this._id }).exec();
+  Comment.deleteMany({posterId: this._id}).exec();
+  next();
+});
 
 // Rooms will be stored as a map with the key being the id,
 // and the value being some data about it, but not everything.

@@ -6,6 +6,10 @@ const commentSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
+  posterId: {
+    type: Schema.Types.ObjectId,
+    ref: "Member",
+  },
   content: {
     type: Schema.Types.Mixed,
   },

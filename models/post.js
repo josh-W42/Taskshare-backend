@@ -7,6 +7,10 @@ const postSchema = new Schema({
     type: Map,
     of: Schema.Types.Mixed,
   },
+  posterId: {
+    type: Schema.Types.ObjectId,
+    ref: "Member",
+  },
   comments: {
     type: Map,
     of: Schema.Types.Mixed,
