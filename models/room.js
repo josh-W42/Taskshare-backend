@@ -4,41 +4,43 @@ const Post = require('./post');
 const Task = require('./task');
 const { Schema } = mongoose;
 
-const roomSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
+const roomSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    workspaceId: {
+      type: Schema.Types.ObjectId,
+      ref: "Workspace",
+    },
+    description: {
+      type: String,
+    },
+    createdByAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
+    allowedMembers: [{ type: Schema.Types.ObjectId, ref: "Member" }],
+    posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    members: {
+      type: Map,
+      of: Schema.Types.Mixed,
+    },
+    tasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
   },
-  workspaceId: {
-    type: Schema.Types.ObjectId,
-    ref: "Workspace",
-  },
-  description: {
-    type: String,
-  },
-  createdByAdmin: {
-    type: Boolean,
-    default: false,
-  },
-  isPrivate: {
-    type: Boolean,
-    default: false,
-  },
-  allowedMembers: [{ type: Schema.Types.ObjectId, ref: "Member" }],
-  posts: {
-    type: Map,
-    of: Schema.Types.Mixed,
-  },
-  members: {
-    type: Map,
-    of: Schema.Types.Mixed,
-  },
-  tasks: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Task",
-  }],
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 // Upon delete, remove all posts and tasks.
 roomSchema.pre("remove", function (next) {

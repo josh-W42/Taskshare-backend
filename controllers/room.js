@@ -49,9 +49,7 @@ const create = async (req, res) => {
       name,
       workspaceId,
       isPrivate,
-      posts: new Map(),
       members: memberMap,
-      tasks: [],
       createdByAdmin: member.role.includes("admin"),
     });
 

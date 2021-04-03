@@ -100,11 +100,35 @@ const edit = async (req, res) => {
     member.bio = bio;
     await member.save();
 
-    // Update All Rooms And Workspaces
+    // Update All Rooms, Posts Workspaces
     db.Room.updateMany(
       { [`members.${member._id}`]: { $exists: true } },
       {
         [`members.${member._id}`]: {
+          firstName: member.firstName,
+          lastName: member.lastName,
+          nickName: member.nickName,
+          imageUrl: member.imageUrl,
+        },
+      }
+    ).exec();
+
+    db.Post.updateMany(
+      { posterId: member.id },
+      {
+        poster: {
+          firstName: member.firstName,
+          lastName: member.lastName,
+          nickName: member.nickName,
+          imageUrl: member.imageUrl,
+        },
+      }
+    ).exec();
+
+    db.Comment.updateMany(
+      { posterId: member.id },
+      {
+        poster: {
           firstName: member.firstName,
           lastName: member.lastName,
           nickName: member.nickName,

@@ -3,12 +3,15 @@ const { Schema } = mongoose;
 
 const commentSchema = new Schema({
   poster: {
-    type: Map,
-    of: Schema.Types.Mixed,
+    type: Schema.Types.Mixed,
   },
   posterId: {
     type: Schema.Types.ObjectId,
     ref: "Member",
+  },
+  postId: {
+    type: Schema.Types.ObjectId,
+    ref: "Post",
   },
   content: {
     type: Schema.Types.Mixed,

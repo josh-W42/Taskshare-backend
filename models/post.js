@@ -4,8 +4,7 @@ const { Schema } = mongoose;
 
 const postSchema = new Schema({
   poster: {
-    type: Map,
-    of: Schema.Types.Mixed,
+    type: Schema.Types.Mixed,
   },
   posterId: {
     type: Schema.Types.ObjectId,
