@@ -31,6 +31,7 @@ app.use('/api/users', routes.user);
 app.use('/api/workspaces', routes.workspace);
 app.use('/api/rooms', routes.room);
 app.use('/api/members', routes.member);
+app.use('/api/posts', routes.post);
 
 // Server
 const server = app.listen(PORT, () => console.log(`Server is running on PORT: ${PORT}`));

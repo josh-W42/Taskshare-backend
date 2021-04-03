@@ -3,4 +3,5 @@ module.exports = {
   workspace: require('./workspace'),
   room: require('./room'),
   member: require('./member'),
+  post: require('./post'),
 }
