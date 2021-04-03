@@ -8,6 +8,11 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   ctrl.room.readOne,
 );
+router.get(
+  "/:id/allPosts",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.room.allPosts,
+);
 
 router.post(
   "/create",

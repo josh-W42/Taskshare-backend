@@ -135,6 +135,53 @@ const readOne = async (req, res) => {
   }
 }
 
+// Get all posts
+const allPosts = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // Check room existence
+    const room = await db.Room.findOne({ _id });
+    if (!room) throw new Error("Room Does Not Exist");
+
+    // check if member and if in room
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: room.workspaceId });
+    if (!member) throw new Error("Forbidden - Not A Member");
+    if (!member.rooms.has(room.id)) throw new Error("Forbidden - Not In Room");
+
+    const promises = room.posts.map( async _id => {
+      const post = await db.Post.findOne({ _id });
+      return post;
+    });
+
+    const results = await Promise.all(promises);
+
+    // Return data
+    res.json({ success: true, count: results.length, results });
+    
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not An Member Of This Workspace.",
+      });
+    } else if (error.message === "Forbidden - Not In Room") {
+      res.status(403).json({
+        success: false,
+        message: "You Must First Join A Room Before You Access Data.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Joining a room.
 const join = async (req, res) => {
   const _id = req.params.id;
@@ -310,7 +357,8 @@ module.exports = {
   test,
   create,
   readOne,
-  remove,
+  allPosts,
   join,
   leave,
+  remove,
 }
