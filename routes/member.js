@@ -14,6 +14,12 @@ router.get(
   ctrl.member.readOneAdmin,
 );
 
+router.put(
+  "/:id/edit",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.member.edit,
+);
+
 router.delete(
   "/:id/remove",
   passport.authenticate('jwt', { session: false }),

@@ -78,6 +78,68 @@ const readOneAdmin = async (req, res) => {
   }
 }
 
+// Edit member information
+const edit = async (req, res) => {
+  const _id = req.params.id;
+  const { firstName, lastName, nickName, bio } = req.body;
+
+  try {
+    // Check Member Existence
+    const member = await db.Member.findOne({ _id });
+    if (!member) throw new Error("Member Does Not Exist");
+
+    // check if editing self
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    if (member.userId.toString() !== payload.id) throw new Error("Forbidden");
+
+    // Make changes
+    member.firstName = firstName;
+    member.lastName = lastName;
+    member.nickName = nickName;
+    member.bio = bio;
+    await member.save();
+
+    // Update All Rooms And Workspaces
+    db.Room.updateMany(
+      { [`members.${member._id}`]: { $exists: true } },
+      {
+        [`members.${member._id}`]: {
+          firstName: member.firstName,
+          lastName: member.lastName,
+          nickName: member.nickName,
+          imageUrl: member.imageUrl,
+        },
+      }
+    ).exec();
+
+    const workspace = await db.Workspace.findOne({ _id: member.workspaceId });
+    workspace.members.set(member.id, {
+      firstName: member.firstName,
+      lastName: member.lastName,
+      nickName: member.nickName,
+      imageUrl: member.imageUrl,
+    });
+    
+    await workspace.save();
+
+    res.json({ success: true, message: "Member Edit Successful" });
+    
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Cannot Edit Someone Else's Profile.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Remove a member, thus removing them
 const remove = async (req, res) => {
   const _id = req.params.id;
@@ -137,5 +199,6 @@ module.exports = {
   test,
   readOneMember,
   readOneAdmin,
+  edit,
   remove,
 }
