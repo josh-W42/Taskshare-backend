@@ -30,8 +30,13 @@ const create = async (req, res) => {
 
     // create the comment.
     const comment = await db.Comment.create({
-      poster: post.poster,
-      posterId: post.posterId,
+      poster: {
+        firstName: member.firstName,
+        lastName: member.lastName,
+        nickName: member.nickName,
+        imageUrl: member.imageUrl,
+      },
+      posterId: member.id,
       postId: post._id,
       workspaceId: post.workspaceId,
       content: {

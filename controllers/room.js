@@ -152,15 +152,10 @@ const allPosts = async (req, res) => {
     if (!member) throw new Error("Forbidden - Not A Member");
     if (!member.rooms.has(room.id)) throw new Error("Forbidden - Not In Room");
 
-    const promises = room.posts.map( async _id => {
-      const post = await db.Post.findOne({ _id });
-      return post;
-    });
-
-    const results = await Promise.all(promises);
-
     // Return data
-    res.json({ success: true, count: results.length, results });
+    const posts = await db.Post.find({ roomId: _id });
+
+    res.json({ success: true, count: posts.length, results: posts });
     
   } catch (error) {
     if (error.message === "Forbidden - Not A Member") {
