@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
+const Comment = require('./comment');
 const Member = require('./member');
+const Post = require('./post');
 const Room = require('./room');
-const User = require('./user');
 const { Schema } = mongoose;
 
 const workspaceSchema = new Schema({
@@ -37,8 +38,10 @@ const workspaceSchema = new Schema({
 
 // Upon delete, remove all rooms, members, and update users
 workspaceSchema.pre('remove', function(next) {
-  Room.deleteMany({workspaceId: this._id}).exec();
-  Member.deleteMany({workspaceId: this._id}).exec();
+  Room.deleteMany({ workspaceId: this._id }).exec();
+  Member.deleteMany({ workspaceId: this._id }).exec();
+  Post.deleteMany({ workspaceId: this._id }).exec();
+  Comment.deleteMany({ workspaceId: this._id }).exec();
   next();
 });
 

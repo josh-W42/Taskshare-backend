@@ -4,4 +4,5 @@ module.exports = {
   room: require('./room'),
   member: require('./member'),
   post: require('./post'),
+  comment: require('./comment'),
 }

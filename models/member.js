@@ -60,7 +60,7 @@ const memberSchema = new Schema({
 // Upon delete, remove all posts and comments made by the member.
 memberSchema.pre('remove', function(next) {
   Post.deleteMany({ posterId: this._id }).exec();
-  Comment.deleteMany({posterId: this._id}).exec();
+  Comment.deleteMany({ posterId: this._id}).exec();
   next();
 });
 

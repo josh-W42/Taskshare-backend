@@ -9,6 +9,7 @@ const commentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Member",
   },
+  workspaceId: { type: Schema.Types.ObjectId, ref: "Workspace" },
   postId: {
     type: Schema.Types.ObjectId,
     ref: "Post",

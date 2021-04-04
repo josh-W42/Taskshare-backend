@@ -10,10 +10,11 @@ const postSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Member",
   },
-  comments: {
-    type: Map,
-    of: Schema.Types.Mixed,
-  },
+  comments: [{
+    type: Schema.Types.ObjectId,
+    ref: "Comment",
+  }],
+  workspaceId: { type: Schema.Types.ObjectId, ref: "Workspace" },
   roomId: {
     type: Schema.Types.ObjectId,
     ref: "Room",

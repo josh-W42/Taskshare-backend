@@ -17,15 +17,13 @@ const create = async (req, res) => {
     const room = await db.Room.findOne({ _id: roomId });
     if (!room) throw new Error("Room Does Not Exist");
 
-    // check if poster is a member of room
-    const [type, token] = req.headers.authorization.split(" ");
+    // check if member and if in room
+    const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
 
-    const member = await db.Member.findOne({
-      userId: payload.id,
-      workspaceId: room.workspaceId,
-    });
-    if (!member || !room.members.has(member.id)) throw new Error("Forbidden");
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: room.workspaceId });
+    if (!member) throw new Error("Forbidden - Not A Member");
+    if (!member.rooms.has(room.id)) throw new Error("Forbidden - Not In Room");
 
     // make a new post
     const post = await db.Post.create({
@@ -35,13 +33,13 @@ const create = async (req, res) => {
         nickName: member.nickName,
         imageUrl: member.imageUrl,
       },
+      workspaceId: room.workspaceId,
       content: {
         textContent,
         imgArray: []
       },
       posterId: member._id,
       roomId: room._id,
-      comments: new Map(),
       reactions: new Map(),
     });
 
@@ -52,10 +50,15 @@ const create = async (req, res) => {
     res.json({ success: true, message: "Post Created Successfully" });
 
   } catch (error) {
-    if (error.message === "Forbidden") {
+    if (error.message === "Forbidden - Not A Member") {
       res.status(403).json({
         success: false,
-        message: "You Are Not An Member Of This Room.",
+        message: "You Are Not An Member Of The Workspace That Houses The Room.",
+      });
+    } else if (error.message === "Forbidden - Not In Room") {
+      res.status(403).json({
+        success: false,
+        message: "You Must First Join A Room Before You Can Post.",
       });
     } else {
       res.status(400).json({
