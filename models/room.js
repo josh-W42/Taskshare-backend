@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Member = require('./member');
+const Comment = require('./comment');
 const Post = require('./post');
 const Task = require('./task');
 const { Schema } = mongoose;
@@ -46,6 +46,7 @@ const roomSchema = new Schema(
 roomSchema.pre("remove", function (next) {
   Post.deleteMany({ roomId: this._id }).exec();
   Task.deleteMany({ roomId: this._id }).exec();
+  Comment.deleteMany({ roomId: this._id }).exec();
   next();
 });
 

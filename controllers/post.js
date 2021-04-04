@@ -125,9 +125,13 @@ const edit = async (req, res) => {
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
 
-    const member = await db.Member.findOne({ userId: payload.id, workspaceId: post.workspaceId });
+    const member = await db.Member.findOne({
+      userId: payload.id,
+      workspaceId: post.workspaceId,
+    });
     if (!member) throw new Error("Forbidden - Not A Member");
-    if (member.id !== post.posterId.toString()) throw new Error("Forbidden - Didn't Post This");
+    if (member.id !== post.posterId.toString())
+      throw new Error("Forbidden - Didn't Post This");
 
     const oldContent = post.content;
     const newContent = {
@@ -160,10 +164,55 @@ const edit = async (req, res) => {
   }
 }
 
+// delete post
+const remove = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // check post existence
+    const post = await db.Post.findOne({ _id });
+    if (!post) throw new Error("Post Does Not Exist");
+
+    // check if poster
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: post.workspaceId });
+    if (!member) throw new Error("Forbidden - Not A Member");
+    if (
+      member.id !== post.posterId.toString() &&
+      !member.role.includes("admin")
+    )
+      throw new Error("Forbidden - Didn't Post This And Not Admin");
+
+    // delete the post
+    await post.delete();
+
+    res.json({ success: true, message: "Post Successfully Deleted" });
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not A Member Of The Workspace This Post is Apart Of",
+      });
+    } else if (error.message === "Forbidden - Didn't Post This And Not Admin") {
+      res.status(403).json({
+        success: false,
+        message: "You Can Only Delete Posts If You Created Them Or If You're An Admin",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
   create,
   allComments,
-  edit
+  edit,
+  remove,
 }

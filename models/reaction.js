@@ -6,6 +6,10 @@ const reactionSchema = new Schema({
     type: String,
     required: true,
   },
+  workspaceId: { 
+    type: String,
+    default: "Base",
+  },
 }, { timestamps: true });
 
 const Reaction = mongoose.model('Reaction', reactionSchema);

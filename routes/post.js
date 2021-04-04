@@ -21,4 +21,10 @@ router.put(
   ctrl.post.edit,
 );
 
+router.delete(
+  "/:id/delete",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.post.remove,
+);
+
 module.exports = router;

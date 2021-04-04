@@ -38,6 +38,7 @@ const create = async (req, res) => {
       },
       posterId: member.id,
       postId: post._id,
+      roomId: post.roomId,
       workspaceId: post.workspaceId,
       content: {
         textContent,

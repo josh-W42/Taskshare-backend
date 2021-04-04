@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Comment = require('./comment');
 const Member = require('./member');
 const Post = require('./post');
+const Reaction = require('./reaction');
 const Room = require('./room');
 const { Schema } = mongoose;
 
@@ -42,6 +43,7 @@ workspaceSchema.pre('remove', function(next) {
   Member.deleteMany({ workspaceId: this._id }).exec();
   Post.deleteMany({ workspaceId: this._id }).exec();
   Comment.deleteMany({ workspaceId: this._id }).exec();
+  Reaction.deleteMany({ workspaceId: this.id }).exec();
   next();
 });
 
