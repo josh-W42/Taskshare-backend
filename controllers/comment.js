@@ -121,9 +121,58 @@ const edit = async (req, res) => {
   }
 }
 
+// Delete comment
+const remove = async (req, res) => {
+  const _id = req.params.id;
+
+  try {
+    // check comment existence
+    const comment = await db.Comment.findOne({ _id });
+    if (!comment) throw new Error("Comment Does Not Exist");
+
+    // check if poster
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({
+      userId: payload.id,
+      workspaceId: comment.workspaceId,
+    });
+    if (!member) throw new Error("Forbidden - Not A Member");
+    if (
+      member.id !== comment.posterId.toString() &&
+      !member.role.includes("admin")
+    )
+      throw new Error("Forbidden - Didn't Post This And Not Admin");
+
+    // delete comment
+    await comment.delete();
+
+    res.json({ success: true, message: "Comment Deleted Successfully" });
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not A Member Of The Workspace This Comment is Apart Of",
+      });
+    } else if (error.message === "Forbidden - Didn't Post This And Not Admin") {
+      res.status(403).json({
+        success: false,
+        message: "You Can Only Delete Comments If You Created Them Or If You're An Admin",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
   create,
   edit,
+  remove,
 }
