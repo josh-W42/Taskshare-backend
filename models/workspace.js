@@ -4,6 +4,7 @@ const Member = require('./member');
 const Post = require('./post');
 const Reaction = require('./reaction');
 const Room = require('./room');
+const User = require('./user');
 const { Schema } = mongoose;
 
 const workspaceSchema = new Schema({
@@ -44,6 +45,7 @@ workspaceSchema.pre('remove', function(next) {
   Post.deleteMany({ workspaceId: this._id }).exec();
   Comment.deleteMany({ workspaceId: this._id }).exec();
   Reaction.deleteMany({ workspaceId: this.id }).exec();
+  User.updateMany({ workSpaces: this._id }, { $pull: { workSpaces: this._id } }).exec();
   next();
 });
 

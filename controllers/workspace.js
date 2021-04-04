@@ -40,7 +40,8 @@ const create = async (req, res) => {
     const payload = jwt.decode(token);
 
     // Find the user
-    const user = await db.User.findOne({ _id: payload.id });   
+    const user = await db.User.findOne({ _id: payload.id });
+    if (!user) throw new Error("User Does Not Exist");
 
     // create workspace
     const workspace = await db.Workspace.create({
@@ -77,6 +78,9 @@ const create = async (req, res) => {
     });
 
     await workspace.save();
+
+    user.workSpaces.push(workspace);
+    await user.save();
 
     res.status(201).json({ success: true, message: "Workspace created" });
     
