@@ -15,4 +15,10 @@ router.post(
   ctrl.post.create,
 );
 
+router.put(
+  "/:id/edit",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.post.edit,
+);
+
 module.exports = router;

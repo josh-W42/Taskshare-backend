@@ -50,7 +50,7 @@ const create = async (req, res) => {
     post.comments.push(comment);
     await post.save();
 
-    res.json({ success: true, message: "Comment Created Successfully." });
+    res.status(201).json({ success: true, message: "Comment Created Successfully." });
 
   } catch (error) {
     if (error.message === "Forbidden") {

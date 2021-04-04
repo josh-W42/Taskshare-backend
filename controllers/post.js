@@ -47,7 +47,7 @@ const create = async (req, res) => {
     room.posts.push(post);
     await room.save();
 
-    res.json({ success: true, message: "Post Created Successfully" });
+    res.status(201).json({ success: true, message: "Post Created Successfully" });
 
   } catch (error) {
     if (error.message === "Forbidden - Not A Member") {
@@ -111,9 +111,59 @@ const allComments = async (req, res) => {
   }
 }
 
+// Edit the post
+const edit = async (req, res) => {
+  const _id = req.params.id;
+  const { textContent } = req.body;
+
+  try {
+    // check post existence
+    const post = await db.Post.findOne({ _id });
+    if (!post) throw new Error("Post Does Not Exist");
+
+    // check if poster
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: post.workspaceId });
+    if (!member) throw new Error("Forbidden - Not A Member");
+    if (member.id !== post.posterId.toString()) throw new Error("Forbidden - Didn't Post This");
+
+    const oldContent = post.content;
+    const newContent = {
+      textContent,
+      imgArray: [],
+    }
+    // Change for later when images are implemented.
+    post.content = newContent;
+    await post.save();
+
+    res.json({ success: true, message: "Post Edit Successful" });
+
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not A Member Of The Workspace This Post is Apart Of",
+      });
+    } else if (error.message === "Forbidden - Didn't Post This") {
+      res.status(403).json({
+        success: false,
+        message: "You Can Only Edit Posts That You Create",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
   create,
   allComments,
+  edit
 }
