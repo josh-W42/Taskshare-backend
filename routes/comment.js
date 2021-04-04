@@ -10,4 +10,10 @@ router.post(
   ctrl.comment.create,
 );
 
+router.put(
+  "/:id/edit",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.comment.edit,
+);
+
 module.exports = router;

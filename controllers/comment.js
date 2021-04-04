@@ -68,8 +68,62 @@ const create = async (req, res) => {
   }
 }
 
+// edit a comment
+const edit = async (req, res) => {
+  const _id = req.params.id;
+  const { textContent } = req.body;
+  try {
+    // check comment existence
+    const comment = await db.Comment.findOne({ _id });
+    if (!comment) throw new Error("Comment Does Not Exist");
+
+    // check if poster
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({
+      userId: payload.id,
+      workspaceId: comment.workspaceId,
+    });
+    if (!member || !member.rooms.has(comment.roomId.toString())) throw new Error("Forbidden - Not A Member");
+    if (member.id !== comment.posterId.toString())
+      throw new Error("Forbidden - Didn't Post This");
+
+    // edit the content
+    const oldContent = comment.content;
+    const newContent = {
+      textContent,
+      imgArray: [],
+    }
+    // Change for later when images are implemented.
+    comment.content = newContent;
+    await comment.save();
+
+    res.json({ success: true, message: "Post Edit Successful" });
+
+  } catch (error) {
+    if (error.message === "Forbidden - Not A Member") {
+      res.status(403).json({
+        success: false,
+        message: "You Are Not A Member Of The Workspace This Comment is Apart Of",
+      });
+    } else if (error.message === "Forbidden - Didn't Post This") {
+      res.status(403).json({
+        success: false,
+        message: "You Can Only Edit Comments That You Create",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
   create,
+  edit,
 }
