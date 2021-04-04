@@ -4,6 +4,7 @@ const passport = require('passport');
 
 router.get('/test', ctrl.user.test);
 router.get('/:id/profile', passport.authenticate('jwt', { session: false }), ctrl.user.profile);
+router.get('/:id/allWorkspaces', passport.authenticate('jwt', { session: false }), ctrl.user.allWorkspaces)
 
 router.post('/register', ctrl.user.register);
 router.post('/login', ctrl.user.login);

@@ -52,9 +52,9 @@ io.on('connection', socket => {
   });
 });
 
-setInterval(() => {
-  io.emit('message', new Date().toTimeString());
-}, 5000);
+// setInterval(() => {
+//   io.emit('message', new Date().toTimeString());
+// }, 5000);
 
 
 module.exports = server;

@@ -143,6 +143,42 @@ const profile = async (req, res) => {
   }  
 };
 
+// Get all Workspaces that this user is apart of
+const allWorkspaces = async (req, res) => {
+  // Already authorized
+  const _id = req.params.id;
+  try {
+    // Only give away information if logged in user id
+    // is the same as the requested id.
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const user = await db.User.findOne({ _id });
+
+    const promises = user.workSpaces.map( async _id => {
+      const workspace = await db.Workspace.findOne({ _id }).select('-allowsAllEmails -newMemberPermissions -inviteLink -rooms -members');
+      if (workspace) return workspace;
+    });
+
+    const results = await Promise.all(promises);
+
+    res.json({ success: true, count: results.length, results });
+  } catch (error) {
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }  
+}
+
 // Edit User Information
 const edit = async (req, res) => {
   // Already Authorized
@@ -329,6 +365,7 @@ module.exports = {
   register,
   login,
   profile,
+  allWorkspaces,
   edit,
   remove,
   addWorkspace,
