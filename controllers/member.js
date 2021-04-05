@@ -45,6 +45,7 @@ const readOneMember = async (req, res) => {
   } 
 }
 
+// get member data if an admin is searching
 const readOneAdmin = async (req, res) => {
   const _id = req.params.id;
 
@@ -75,6 +76,31 @@ const readOneAdmin = async (req, res) => {
         message: error.message,
       });
     }
+  }
+}
+
+// get member data if the searcher and member are the same person
+// useful if member id is unknown
+const readOneSelf = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // Lookup the workspace
+    const workspace = await db.Workspace.findOne({ _id });
+    if (!workspace) throw new Error("Workspace does not exist");
+
+    // Look up the member
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+
+    const member = await db.Member.findOne({ userId: payload.id, workspaceId: workspace.id });
+    if (!member) throw new Error("Member Doesn't Exist");
+
+    res.json({ success: true, result: member });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 }
 
@@ -223,6 +249,7 @@ module.exports = {
   test,
   readOneMember,
   readOneAdmin,
+  readOneSelf,
   edit,
   remove,
 }

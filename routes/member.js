@@ -13,6 +13,11 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   ctrl.member.readOneAdmin,
 );
+router.get(
+  "/lookup/workspace/:id",
+  passport.authenticate('jwt', { session: false }),
+  ctrl.member.readOneSelf,
+);
 
 router.put(
   "/:id/edit",
