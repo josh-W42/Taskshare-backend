@@ -68,6 +68,9 @@ For this application I was very inpired by other productivity/communication appl
 - I would use this to parse new posts/comments and preview them before posting.
 - It would be an interesting challenge to implement this as well but only if there's enough time.
 
+# API Documentation:
+Published with [Postman](https://documenter.getpostman.com/view/5760839/TzCS4Qpp)
+
 # Wireframes:
 ![Work space wireframe](./readme_assets/workspace.png)
 ** I spent some time working on a figma wireframe but this prototype is more accurate to what I had in mind.
