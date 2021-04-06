@@ -26,6 +26,10 @@ const roomSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isAMessageRoom: {
+      type: Boolean,
+      default: false,
+    },
     allowedMembers: [{ type: Schema.Types.ObjectId, ref: "Member" }],
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     members: {

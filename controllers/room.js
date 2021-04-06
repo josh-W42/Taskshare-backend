@@ -11,8 +11,9 @@ const test = async (req, res) => {
 
 // create a room
 const create = async (req, res) => {
-  let { name, workspaceId, isPrivate } = req.body;
+  let { name, workspaceId, isPrivate, isAMessageRoom } = req.body;
   isPrivate = isPrivate ? true : false;
+  isAMessageRoom = isAMessageRoom ? true : false;
 
   try {
     // check if admin or has permissions
@@ -51,6 +52,7 @@ const create = async (req, res) => {
       isPrivate,
       members: memberMap,
       createdByAdmin: member.role.includes("admin"),
+      isAMessageRoom
     });
 
     // add room to member instance
@@ -219,6 +221,27 @@ const join = async (req, res) => {
       nickName: member.nickName,
       imageUrl: member.imageUrl,
     });
+
+    // Add a new Post saying that they joined
+    const post = await db.Post.create({
+      poster: {
+        firstName: "TaskShare",
+        lastName: "",
+        nickName: "",
+        imageUrl: "",
+      },
+      workspaceId: room.workspaceId,
+      content: {
+        textContent: `${member.firstName} Joined This Room. Welcome!`,
+        imgArray: []
+      },
+      posterId: member._id,
+      roomId: room._id,
+      reactions: new Map(),
+    });
+
+    room.posts.push(post);
+
     await room.save();
 
     res.json({ success: true, message: "Successfully Joined Room" });
@@ -270,8 +293,27 @@ const leave = async (req, res) => {
     room.members.delete(member.id);
     await room.save();
 
-    // If a room has zero members, delete it MAYBE Not sure yet, this is good for Debugging.
-    // if (room.members.size < 1) room.delete();
+    // Add a new Post saying that they left
+    const post = await db.Post.create({
+      poster: {
+        firstName: "TaskShare",
+        lastName: "",
+        nickName: "",
+        imageUrl: "",
+      },
+      workspaceId: room.workspaceId,
+      content: {
+        textContent: `${member.firstName} Left Has This Room.`,
+        imgArray: []
+      },
+      posterId: member._id,
+      roomId: room._id,
+      reactions: new Map(),
+    });
+
+    room.posts.push(post);
+
+    await room.save();
 
     res.json({ success: true, message: "Successfully Left Room" });
 

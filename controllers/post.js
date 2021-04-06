@@ -47,7 +47,7 @@ const create = async (req, res) => {
     room.posts.push(post);
     await room.save();
 
-    res.status(201).json({ success: true, message: "Post Created Successfully" });
+    res.status(201).json({ success: true, message: "Post Created Successfully", post });
 
   } catch (error) {
     if (error.message === "Forbidden - Not A Member") {

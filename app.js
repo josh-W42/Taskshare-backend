@@ -46,7 +46,31 @@ const io = require('socket.io')(server, {
 
 io.on('connection', socket => {
   console.log(`connect: ${socket.id}`);
+  
+  // All rooms are found with their mongo ids
+  // so a socket can join a workspace, room, or Direct message
+  // room just by referencing the id.
+  socket.on('join room', (data) => {
+    const id = data.id;
+    socket.join(id);
+  });
+  
+  socket.on('leave room', (data) => {
+    const id = data.id;
+    socket.leave(id);
+  });
+  
+  // We want to emit to all sockets that are in the room
+  //  So that way we can add a post
+  socket.on('new post', (data) => {
+    io.to(`${data.roomId}-room`).emit('newContent', data);
+    socket.to(`${data.roomId}-notification`).emit('newNotification', data);
+  });
 
+  socket.on('delete post', (data) => {
+    io.to(`${data.roomId}-room`).emit('deleteContent', data._id);
+  });
+  
   socket.on('disconnect', () => {
     console.log(`disconnect: ${socket.id}`);
   });
