@@ -46,12 +46,13 @@ const create = async (req, res) => {
       },
       reactions: new Map(),
     });
+  
 
     // Add comment to post
     post.comments.push(comment);
     await post.save();
 
-    res.status(201).json({ success: true, message: "Comment Created Successfully." });
+    res.status(201).json({ success: true, message: "Comment Created Successfully.", comment });
 
   } catch (error) {
     if (error.message === "Forbidden") {

@@ -63,8 +63,13 @@ io.on('connection', socket => {
   // We want to emit to all sockets that are in the room
   //  So that way we can add a post
   socket.on('new post', (data) => {
-    io.to(`${data.roomId}-room`).emit('newContent', data);
-    socket.to(`${data.roomId}-notification`).emit('newNotification', data);
+    if (data.isComment) {
+      io.to(`${data.newPost.postId}-room`).emit('newContent', data.newPost);
+      socket.to(`${data.newPost.postId}-notification`).emit('newNotification', data.newPost);
+    } else {
+      io.to(`${data.newPost.roomId}-room`).emit('newContent', data.newPost);
+      socket.to(`${data.newPost.roomId}-notification`).emit('newNotification', data.newPost);
+    }
   });
 
   socket.on('delete post', (data) => {

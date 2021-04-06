@@ -4,6 +4,11 @@ const passport = require('passport');
 
 router.get("/test", ctrl.post.test);
 router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.post.readOne,
+);
+router.get(
   "/:id/allComments",
   passport.authenticate("jwt", { session: false }),
   ctrl.post.allComments,
